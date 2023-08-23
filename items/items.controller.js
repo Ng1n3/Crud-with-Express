@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const itemDBPath = path.join(__dirname, "..", "db", "items.json");
 const itemDB = JSON.parse(fs.readFileSync(itemDBPath, "utf8"));
+const {logEvents} = require('./items.middleware');
 
 const GetItems = (req, res) => {
 	const { search, limit } = req.query;
@@ -18,6 +19,7 @@ const GetItems = (req, res) => {
 	if(limit) {
 		sortedDB = sortedDB.slice(0, Number(limit));
 	}
+	logEvents(req.method + '\t successful' );
 	res.status(200).send(sortedDB);
 };
 
@@ -46,9 +48,11 @@ const GetOneItem = (req, res) => {
 	const { id } = req.params;
 	const singleItem = itemDB.find((itm) => itm.id === Number(id));
 	if (!singleItem) {
+		logEvents(req.method + '\t Unsuccessful' );
 		res.status(404).end("Item with id not found");
 		return;
 	}
+	logEvents(req.method + '\t successful' );
 	res.status(200).send(singleItem);
 };
 
@@ -61,12 +65,14 @@ const DeleteItem = (req, res) => {
 	fs.writeFile(itemDBPath, JSON.stringify(itemDB), (err) => {
 		if (err) {
 			console.log(err);
+			logEvents(req.method + '\t Unsuccessful' );
 			res.status(500).end(
 				JSON.stringify({
 					message: "Internal server error, could not save item to the database",
 				})
 			);
 		}
+		logEvents(req.method + '\t successful' );
 		res.status(200).end("Deletion successful");
 	});
 };
@@ -81,6 +87,7 @@ const CreateItem = (req, res) => {
 	fs.readFile(itemDBPath, "utf8", (err, data) => {
 		if (err) {
 			console.log(err);
+			logEvents(req.method + '\t Unsuccessful' );
 			res.status(404).end("Cannot read from database");
 		}
 		res.end(data);
@@ -91,12 +98,13 @@ const CreateItem = (req, res) => {
 		fs.writeFile(itemDBPath, JSON.stringify(allitems), (err) => {
 			if (err) {
 				console.log(err);
+				logEvents(req.method + '\t Unsuccessful' );
 				res.status(500).send({
 					message:
 						"Internal server Error, unable to write new item to database",
 				});
 			}
-
+			logEvents(req.method + '\t successful' );
 			res.end(JSON.stringify(newItem));
 		});
 	});

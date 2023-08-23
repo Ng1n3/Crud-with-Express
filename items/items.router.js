@@ -17,4 +17,4 @@ router.get('/:id', controller.GetOneItem);
 // DELETE ONE ITEM BY ID
 router.delete('/:id', controller.DeleteItem);
 
-module.exports = router
+module.exports = router;
